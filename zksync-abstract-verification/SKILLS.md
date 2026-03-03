@@ -64,10 +64,10 @@ EOF
 # 3. Submit
 curl -s -X POST "https://zksync2-mainnet-explorer.zksync.io/contract_verification" \
   -H "Content-Type: application/json" -d @/tmp/payload.json
-# Returns numeric ID, e.g. 105504
+# Returns numeric ID, e.g. 12345
 
 # 4. Poll (wait ~15s)
-curl -s "https://zksync2-mainnet-explorer.zksync.io/contract_verification/105504"
+curl -s "https://zksync2-mainnet-explorer.zksync.io/contract_verification/12345"
 # {"status":"successful"}
 ```
 
@@ -225,19 +225,18 @@ PYEOF
 | Deployed via `forge script --zksync` | zkEVM bytecode, needs zksolc |
 | Deployed via Arachnid factory | EVM bytecode, standard solc only |
 
-### Common deploy profile (hop-v2):
+### Example deploy profile:
 ```toml
 [profile.deploy]
 optimizer = true
 optimizer_runs = 1_000_000
 via_ir = true
-# Also from [profile.default]:
-evm_version = "paris"       # BUT actual bytecodes use shanghai (PUSH0)
+evm_version = "shanghai"
 bytecode_hash = "none"
 cbor_metadata = false
 ```
 
-**Important:** The foundry.toml says `evm_version = "paris"` in the default profile, but the actual deployed bytecodes use PUSH0 (`5f`) which means `shanghai`. Always verify by comparing bytecodes, not by trusting the config file alone.
+**Important:** The `foundry.toml` default profile may differ from the deploy profile (e.g., `paris` vs `shanghai`, optimizer off vs on). The deployed bytecode is the source of truth — always verify by comparing bytecodes, not by trusting the config file alone. If the on-chain bytecode contains `5f` (PUSH0), the EVM version is `shanghai` or later.
 
 ---
 
@@ -275,7 +274,7 @@ for k in ['codegen', 'enableEraVMExtensions', 'forceEVMLA']:
 
 ## Proxy Verification
 
-For `FraxUpgradeableProxy` or similar proxies:
+For `TransparentUpgradeableProxy` or similar proxies:
 - Constructor args: `(address _implementation, address _admin, bytes _data)`
 - ERA explorer API handles constructor args automatically from standard JSON — no separate parameter needed
 - Abscan (Etherscan V2) requires `--constructor-args <hex>` flag
@@ -315,41 +314,9 @@ cast abi-encode "constructor(address,address,bytes)" \
 
 ---
 
-## Reference: Verified Contracts (hop-v2)
-
-### zkSync ERA (chain 324)
-
-| Contract | Address | Bytecode Type | Deployer | Verification |
-|----------|---------|--------------|----------|--------------|
-| RemoteHopV2 (impl) | `0x0000000087ED0dD8b999aE6C7c30f95e9707a3C6` | EVM | Arachnid CREATE2 | ERA explorer ID 105504 |
-| FraxUpgradeableProxy | `0x0000006D38568b00B457580b734e0076C62de659` | EVM | Arachnid CREATE2 | ERA explorer ID 105505 |
-| RemoteAdmin | `0x000000000E0E120FCAc7b4d98e9E35E1DE6fdadb` | zkEVM | forge --zksync (L2 Create2Factory) | ERA explorer ID 105506 |
-
-**Settings for EVM contracts:** solc 0.8.23, shanghai, optimizer=true, runs=1M, viaIR=true, bytecodeHash=none, cborMetadata=false
-**Settings for zkEVM contract:** solc 0.8.23, zksolc v1.5.11
-
-### Abstract (chain 2741)
-
-| Contract | Address | Bytecode Type | Deployer | Verification |
-|----------|---------|--------------|----------|--------------|
-| RemoteHopV2 (impl) | `0x0000000087ED0dD8b999aE6C7c30f95e9707a3C6` | EVM | Arachnid CREATE2 | Abscan (Etherscan V2) |
-| FraxUpgradeableProxy | `0x0000006D38568b00B457580b734e0076C62de659` | EVM | Arachnid CREATE2 | Abscan (Etherscan V2) |
-| RemoteAdmin | `0x000000000E0E120FCAc7b4d98e9E35E1DE6fdadb` | zkEVM | forge --zksync (L2 Create2Factory) | Abscan (Etherscan V2) |
-
-**Same contract addresses on both chains** (same bytecode, same CREATE2 salts).
-
-### Constructor Arguments
-
-| Contract | Constructor Args (ABI-encoded hex) |
-|----------|-----------------------------------|
-| FraxUpgradeableProxy | `0x0000000000000000000000000000000087ed0dd8b999ae6c7c30f95e9707a3c600000000000000000000000054f9b12743a7deec0ea48721683cbebedc6e17bc00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000` |
-| RemoteAdmin | `0x000000000000000000000000ea77c590bb36c43ef7139ce649cfbcfd6163170d0000000000000000000000000000006d38568b00b457580b734e0076c62de6590000000000000000000000005f25218ed9474b721d6a38c115107428e832fa2e` |
-
-### Key Addresses
+## Well-Known Addresses
 
 | Role | Address |
 |------|---------|
-| GCP KMS deployer | `0x54f9b12743a7deec0ea48721683cbebedc6e17bc` |
 | Arachnid CREATE2 factory | `0x4e59b44847b379578588920cA78FbF26c0B4956C` |
 | zkSync L2 Create2Factory | `0x0000000000000000000000000000000000010000` |
-| Etherscan API key (Abscan) | `98K9P43YDT6K882QVCDS8UDGJ62794NYPN` |
