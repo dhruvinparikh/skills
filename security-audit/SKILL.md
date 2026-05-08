@@ -4,7 +4,18 @@
 
 ---
 
-## 📋 Table of Contents
+## � Bundled Resources
+
+Companion files in [`resources/`](./resources):
+
+- [`resources/COMPLETENESS_CHECKLIST.md`](./resources/COMPLETENESS_CHECKLIST.md) — Verification checklist to apply at the end of any per-function micro-analysis (structural, semantic, and risk-coverage items).
+- [`resources/FUNCTION_MICRO_ANALYSIS_EXAMPLE.md`](./resources/FUNCTION_MICRO_ANALYSIS_EXAMPLE.md) — Worked example of a complete function micro-analysis (DEX `swap`) showing the format expected by the checklist.
+
+When asked to "audit a function" or "do a micro-analysis", read both before producing output.
+
+---
+
+## �📋 Table of Contents
 
 - [Security & Auditing](#security--auditing)
 - [Trail of Bits Security Skills](#trail-of-bits-security-skills)

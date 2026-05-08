@@ -141,6 +141,7 @@ See [`examples/tg-message-template.md`](./examples/tg-message-template.md) for t
 
 ## Common Pitfalls
 
+- **Copying secrets from source docs.** Reference docs sometimes embed Safe credentials, RPC keys, or simulator URLs with auth tokens. **Always grep for `password`, `username`, `api[_-]key`, `Bearer`, long base64 strings before publishing** — redact and replace with "request from team in private channel".
 - Including flat/generated contract diffs in the commit. Always inspect `git status` and reset stray changes.
 - Inventing nonces. Don't.
 - Repeating msig URL in the TG message that's already in HackMD.
